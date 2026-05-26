@@ -11,6 +11,9 @@ import pytest
 
 from rag.core import config as config_module
 from rag.core import registry as registry_module
+from rag.observability import logging as logging_module
+from rag.observability import metrics as metrics_module
+from rag.observability import tracing as tracing_module
 
 # Root of the repo — used to locate the real config/ directory.
 REPO_ROOT = Path(__file__).parent.parent
@@ -31,6 +34,18 @@ def reset_registry():
     registry_module.reset()
     yield
     registry_module.reset()
+
+
+@pytest.fixture(autouse=True)
+def reset_observability():
+    """Reset observability singletons before and after every test."""
+    logging_module.reset_logging()
+    tracing_module.reset_tracing()
+    metrics_module.reset_metrics()
+    yield
+    logging_module.reset_logging()
+    tracing_module.reset_tracing()
+    metrics_module.reset_metrics()
 
 
 @pytest.fixture()
