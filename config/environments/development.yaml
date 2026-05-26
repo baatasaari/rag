@@ -1,0 +1,74 @@
+# Development environment overlay.
+# Deep-merges into rag_config.yaml — only listed keys are changed.
+# Optimised for: fast feedback, no cloud dependencies, full tracing.
+
+pipeline:
+  pattern: naive          # skip adaptive routing overhead in dev
+
+ingestion:
+  loaders:                # only local formats in dev
+    - type: pdf
+    - type: docx
+    - type: gcs
+      bucket: rag-documents-raw-dev
+
+chunking:
+  strategy: hierarchical  # keep the default to catch issues early
+
+embedding:
+  project_id: lbg-rag-dev
+  rate_limits:
+    requests_per_minute: 300    # lower quota for dev tier
+
+storage:
+  vector_store:
+    provider: pgvector          # local Postgres via docker-compose
+  graph_store: null             # Neo4j optional — skip for minimal local setup
+  cache:
+    semantic_cache:
+      enabled: false            # skip semantic cache in dev for deterministic tests
+
+retrieval:
+  strategy: dense               # simpler than hybrid; no Vertex AI Search needed
+  top_k: 5
+
+augmentation:
+  reranker:
+    enabled: false              # no Cohere API key required locally
+  context_compression:
+    enabled: false
+
+generation:
+  temperature: 0.0              # deterministic outputs for dev testing
+  max_output_tokens: 512
+
+security:
+  pii_detection:
+    enabled: false              # no Cloud DLP needed locally
+  audit_log:
+    immutable: false            # allow table truncation during local dev
+
+observability:
+  tracing:
+    exporter: console           # print spans to stdout instead of Cloud Trace
+    sampling_rate: 1.0          # trace every request in dev
+  logging:
+    level: DEBUG
+    exporter: stdout            # human-readable in terminal
+    structured: false
+  metrics:
+    exporter: console
+  evaluation:
+    online:
+      enabled: false            # skip async eval in dev
+    offline:
+      run_on_deploy: false
+
+resilience:
+  circuit_breaker:
+    enabled: false              # simpler failure modes during development
+  retry:
+    embedding:
+      max_attempts: 1
+    llm:
+      max_attempts: 1

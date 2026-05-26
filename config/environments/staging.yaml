@@ -1,0 +1,38 @@
+# Staging environment overlay.
+# Uses real GCP services. Full observability. Relaxed eval thresholds for iteration.
+
+pipeline:
+  pattern: adaptive
+
+embedding:
+  project_id: lbg-rag-staging
+
+generation:
+  project_id: lbg-rag-staging
+
+security:
+  pii_detection:
+    project_id: lbg-rag-staging
+  audit_log:
+    wal_archive_bucket: lbg-rag-audit-archive-staging
+    immutable: true
+
+observability:
+  tracing:
+    sampling_rate: 1.0            # trace everything in staging — generous budget
+    always_sample_errors: true
+  logging:
+    level: DEBUG
+    structured: true
+    exporter: cloud_logging
+  evaluation:
+    online:
+      sample_rate: 1.0            # evaluate every response in staging
+    offline:
+      run_on_deploy: true
+      thresholds:
+        faithfulness: 0.80        # slightly relaxed vs production for iteration
+        answer_relevancy: 0.75
+        context_precision: 0.75
+        context_recall: 0.70
+        groundedness: 0.80

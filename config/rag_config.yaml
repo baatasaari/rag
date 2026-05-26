@@ -1,0 +1,352 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# LBG RAG Platform — Master Configuration
+# ══════════════════════════════════════════════════════════════════════════════
+#
+# All ${VAR_NAME} values are resolved at load time:
+#   1. Environment variable  (os.environ["VAR_NAME"])
+#   2. GCP Secret Manager    (projects/{GCP_PROJECT_ID}/secrets/var-name/versions/latest)
+#
+# Environment overlays in config/environments/{env}.yaml deep-merge into this
+# file — only keys present in the overlay are changed.
+#
+# DO NOT commit real credentials here. Use ${VAR} placeholders only.
+# ══════════════════════════════════════════════════════════════════════════════
+
+pipeline:
+  name: lbg-rag-platform
+  version: "1.0.0"
+  # adaptive: the router picks the best pattern per query.
+  # Override in environments/development.yaml to 'naive' for simpler dev loops.
+  pattern: adaptive
+
+# ── Ingestion ──────────────────────────────────────────────────────────────────
+ingestion:
+  loaders:
+    - type: pdf
+    - type: docx
+    - type: gcs
+      bucket: rag-documents-raw
+    - type: confluence
+      base_url: ${CONFLUENCE_URL}
+    - type: sharepoint
+      tenant_id: ${SHAREPOINT_TENANT_ID}
+  cleaner:
+    remove_headers_footers: true
+    normalize_whitespace: true
+    detect_language: true
+    min_content_length: 50
+  deduplication:
+    strategy: semantic
+    threshold: 0.97
+
+# ── Chunking ───────────────────────────────────────────────────────────────────
+# All strategy configs are present — only the active `strategy` is used.
+# Swap strategy with a single-line change; all others stay as documented defaults.
+chunking:
+  strategy: hierarchical    # DEFAULT — best precision/context balance for banking docs
+
+  fixed:
+    chunk_size: 512
+    overlap: 64
+    unit: tokens
+
+  sentence:
+    min_sentences: 3
+    max_sentences: 8
+
+  semantic:
+    breakpoint_type: percentile
+    breakpoint_threshold: 95.0
+    buffer_size: 1
+
+  hierarchical:
+    parent_chunk_size: 2048   # returned to LLM for full context
+    child_chunk_size: 512     # used for precise ANN retrieval
+    overlap: 64
+
+  recursive:
+    separators:
+      - "\n\n"
+      - "\n"
+      - ". "
+      - " "
+    chunk_size: 512
+    overlap: 64
+
+  # agentic, ast, raptor: set strategy + uncomment the relevant block below.
+  # agentic:
+  #   model: gemini-2.0-flash-001
+  #   task_prompt: "Generate the single question this passage best answers."
+  #   max_chunk_size: 1024
+  #
+  # ast:
+  #   language: python
+  #   max_chunk_size: 1024
+  #   include_docstrings: true
+  #
+  # raptor:
+  #   leaf_chunk_size: 512
+  #   cluster_method: umap_gmm
+  #   summary_model: gemini-2.0-flash-001
+  #   max_levels: 3
+  #   min_cluster_size: 5
+
+# ── Embedding ─────────────────────────────────────────────────────────────────
+# CRITICAL: task_types are enforced by the EmbeddingEngine.
+# ingestion MUST be RETRIEVAL_DOCUMENT; query MUST be RETRIEVAL_QUERY.
+# Using the same type for both defeats asymmetric retrieval alignment.
+embedding:
+  provider: vertex_ai
+  model: text-embedding-004
+  project_id: ${GCP_PROJECT_ID}
+  location: europe-west2           # EU data residency — do not change without compliance sign-off
+
+  task_types:
+    ingestion: RETRIEVAL_DOCUMENT
+    query: RETRIEVAL_QUERY
+    cache_lookup: SEMANTIC_SIMILARITY
+    evaluation: SEMANTIC_SIMILARITY
+    clustering: CLUSTERING
+    classification: CLASSIFICATION
+
+  dimensions:
+    default: 768          # stored in vector index
+    fast_path: 256        # used for semantic cache lookups (Matryoshka truncation)
+
+  batching:
+    max_batch_size: 250       # Vertex AI hard limit for text-embedding-004
+    max_concurrent_batches: 10
+    batch_timeout_ms: 5000
+
+  rate_limits:
+    requests_per_minute: 1500    # adjust to match your Vertex AI quota tier
+    tokens_per_minute: 4000000
+    retry_on_429: true
+    backoff_multiplier: 2.0
+
+  fallback:
+    enabled: true
+    provider: vertex_ai
+    model: text-multilingual-embedding-002    # quota failover + non-EN content
+
+  cost_tracking:
+    enabled: true
+    metric_name: rag/embedding/cost_usd
+    price_per_1k_chars: 0.000025             # update when Vertex AI pricing changes
+
+# ── Storage ───────────────────────────────────────────────────────────────────
+storage:
+  vector_store:
+    provider: alloydb_pgvector
+    connection_string: ${ALLOYDB_CONNECTION}
+    database: rag_platform
+    pool_size: 20
+    max_overflow: 40
+    index:
+      type: hnsw                  # hnsw: best recall; ivfflat: lower RAM for >5M vectors
+      hnsw:
+        m: 16                     # connections per node — 16 is the standard default
+        ef_construction: 64       # build-time accuracy — increase for higher quality index
+        ef_search: 40             # query-time accuracy — MUST be >= retrieval.top_k
+      ivfflat:
+        lists: 1000               # sqrt(n_vectors) is a good starting point
+        probes: 10
+    dimensions: 768
+    distance_metric: cosine       # for L2-normalised Gemini vectors
+
+  document_store:
+    provider: alloydb
+    connection_string: ${ALLOYDB_CONNECTION}
+    database: rag_platform
+    pool_size: 10
+
+  graph_store:
+    provider: neo4j
+    uri: ${NEO4J_URI}
+    username: ${NEO4J_USERNAME}
+    password: ${NEO4J_PASSWORD}
+    database: neo4j
+    max_connection_pool_size: 50
+
+  cache:
+    provider: redis
+    url: ${REDIS_URL}
+    ttl_seconds: 3600
+    key_prefix: lbg_rag
+    semantic_cache:
+      enabled: true
+      threshold: 0.97             # cosine similarity above which cached response is returned
+      dimensions: 256             # MUST equal embedding.dimensions.fast_path
+
+# ── Retrieval ─────────────────────────────────────────────────────────────────
+retrieval:
+  strategy: hybrid
+  top_k: 20                       # candidates before re-ranking — HNSW ef_search must be >= this
+  dense:
+    weight: 0.7
+  sparse:
+    provider: vertex_ai_search
+    weight: 0.3                   # dense + sparse weights must sum to 1.0 for hybrid
+    data_store_id: ${VERTEX_SEARCH_DATA_STORE_ID}
+    project_id: ${GCP_PROJECT_ID}
+    location: europe-west2
+  hybrid_fusion: rrf
+  rrf_k_constant: 60              # standard RRF constant — rarely needs changing
+  metadata_filters: true
+  mmr:
+    enabled: true
+    lambda: 0.5                   # 0 = max diversity, 1 = max relevance
+
+# ── Augmentation ──────────────────────────────────────────────────────────────
+augmentation:
+  reranker:
+    enabled: true
+    provider: cohere
+    model: rerank-english-v3.0
+    api_key: ${COHERE_API_KEY}
+    top_n: 5                      # MUST be <= retrieval.top_k
+    fallback_provider: cross_encoder
+
+  context_compression:
+    enabled: true
+    strategy: llm_extract
+    model: gemini-2.0-flash-001
+    max_output_tokens: 1024
+
+  query_transformation:
+    hyde: false
+    step_back: true
+    multi_query: true
+    multi_query_count: 3
+    sub_query: false
+
+# ── Generation ────────────────────────────────────────────────────────────────
+generation:
+  provider: vertex_ai
+  model: gemini-2.0-flash-001
+  location: europe-west2
+  project_id: ${GCP_PROJECT_ID}
+  temperature: 0.1
+  max_output_tokens: 2048
+  system_prompt_template: lbg-default
+  prompt_version: v1.0.0
+  citation_mode: inline
+  stream: true
+  fallback:
+    enabled: true
+    provider: vertex_ai
+    model: gemini-1.5-pro-002     # higher reasoning capacity; higher cost
+
+# ── Agents ────────────────────────────────────────────────────────────────────
+agents:
+  pattern: react
+  max_iterations: 10
+  confidence_threshold: 0.85
+  hitl_gates:
+    after_planning: false
+    after_draft: false
+    compliance_topics: true       # always pause for regulated-topic queries
+  tools:
+    - rag_tool
+    - sql_tool
+    - api_tool
+    - calculator_tool
+  rag_as_tool: true
+
+# ── Security ──────────────────────────────────────────────────────────────────
+security:
+  pii_detection:
+    enabled: true
+    provider: cloud_dlp
+    project_id: ${GCP_PROJECT_ID}
+    inspection_template: lbg-rag-uk-pii-template
+    deidentification_template: lbg-rag-deident-template
+    log_finding_types: true       # log TYPE, never VALUE — mandatory for compliance
+    tag_chunk_metadata: true
+    emit_audit_event: true
+    reject_restricted_data: true
+
+  data_classification:
+    enabled: true
+    default: INTERNAL             # unclassified documents are treated as INTERNAL
+
+  rbac:
+    enabled: true
+    enforce_at_retrieval: true    # server-side — cannot be bypassed by callers
+
+  audit_log:
+    enabled: true
+    immutable: true               # append-only + WAL archive — required for FCA
+    wal_archive_bucket: lbg-rag-audit-archive
+    table_name: audit_events
+
+# ── Observability ──────────────────────────────────────────────────────────────
+observability:
+  tracing:
+    provider: opentelemetry
+    exporter: cloud_trace
+    sampling_rate: 0.1            # 10% in production — errors always sampled
+    always_sample_errors: true
+    always_sample_slow_requests_ms: 3000
+
+  logging:
+    level: INFO
+    structured: true              # JSON lines — mandatory in all non-local envs
+    exporter: cloud_logging
+    include_trace_context: true   # injects trace_id/span_id for log-trace correlation
+
+  metrics:
+    provider: opentelemetry
+    exporter: cloud_monitoring
+    namespace: custom.googleapis.com/rag
+    export_interval_seconds: 15
+
+  evaluation:
+    framework: ragas
+    online:
+      enabled: true
+      async_eval: true            # never blocks response delivery
+      sample_rate: 0.1
+    offline:
+      golden_qa_bucket: lbg-rag-eval
+      run_on_deploy: true
+      thresholds:
+        faithfulness: 0.85
+        answer_relevancy: 0.80
+        context_precision: 0.80
+        context_recall: 0.75
+        groundedness: 0.85
+
+# ── Resilience ────────────────────────────────────────────────────────────────
+resilience:
+  circuit_breaker:
+    enabled: true
+    failure_threshold: 5
+    window_seconds: 30
+    open_duration_seconds: 60
+    success_threshold_to_close: 2
+
+  retry:
+    embedding:
+      max_attempts: 3
+      base_delay_ms: 500
+      max_delay_ms: 8000
+      backoff: exponential
+      jitter: true
+      retry_on_status_codes: [429, 500, 502, 503, 504]
+
+    llm:
+      max_attempts: 3
+      base_delay_ms: 1000
+      max_delay_ms: 16000
+      backoff: exponential
+      jitter: true
+      retry_on_status_codes: [429, 500, 503]
+
+    vector_store:
+      max_attempts: 3
+      base_delay_ms: 200
+      max_delay_ms: 3000
+      backoff: linear
+      jitter: false
+      retry_on_status_codes: []

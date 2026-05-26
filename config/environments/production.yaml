@@ -1,0 +1,47 @@
+# Production environment overlay.
+# All sensitive values are in Secret Manager — nothing sensitive here.
+# This file may be committed to source control as-is.
+
+pipeline:
+  pattern: adaptive
+
+embedding:
+  project_id: lbg-rag-prod
+
+generation:
+  project_id: lbg-rag-prod
+
+security:
+  pii_detection:
+    project_id: lbg-rag-prod
+  audit_log:
+    wal_archive_bucket: lbg-rag-audit-archive-prod
+    immutable: true
+
+observability:
+  tracing:
+    sampling_rate: 0.1
+    always_sample_errors: true
+    always_sample_slow_requests_ms: 3000
+  logging:
+    level: INFO
+    structured: true
+    exporter: cloud_logging
+  evaluation:
+    online:
+      sample_rate: 0.1
+    offline:
+      run_on_deploy: true
+      thresholds:
+        faithfulness: 0.85
+        answer_relevancy: 0.80
+        context_precision: 0.80
+        context_recall: 0.75
+        groundedness: 0.85
+
+resilience:
+  circuit_breaker:
+    enabled: true
+    failure_threshold: 5
+    window_seconds: 30
+    open_duration_seconds: 60
