@@ -314,3 +314,69 @@ class CircuitBreakerOpenError(RAGPipelineError):
             component="resilience",
             context=ctx,
         )
+
+
+# ── Security errors ───────────────────────────────────────────────────────────
+
+
+class SecurityError(RAGPlatformError):
+    """Base for all security-related errors."""
+
+
+class PIIDetectedError(SecurityError):
+    """Raised when PII is found in text that must be PII-free.
+
+    Only carries the PII *types* found — the actual values are never stored.
+    """
+
+    def __init__(self, pii_types: list[str]) -> None:
+        formatted = ", ".join(pii_types)
+        super().__init__(
+            f"PII detected in input ({formatted}). Request blocked to protect sensitive data. "
+            f"Remove all personally identifiable information before resubmitting.",
+            component="security",
+            context={"pii_types": pii_types},
+        )
+        self.pii_types = pii_types
+
+
+class AccessDeniedError(SecurityError):
+    """Raised when a user's clearance level is insufficient for a requested operation."""
+
+    def __init__(
+        self,
+        user_id_hash: str = "",
+        required_clearance: str = "",
+        user_clearance: str = "",
+        resource_id: str = "",
+    ) -> None:
+        super().__init__(
+            f"Access denied: user clearance {user_clearance!r} is insufficient "
+            f"(required: {required_clearance!r}).",
+            component="security",
+            context={
+                "user_id_hash": user_id_hash,
+                "required_clearance": required_clearance,
+                "user_clearance": user_clearance,
+                "resource_id": resource_id,
+            },
+        )
+        self.user_id_hash = user_id_hash
+        self.required_clearance = required_clearance
+        self.user_clearance = user_clearance
+
+
+class AuditLogError(SecurityError):
+    """Raised when the audit log fails to write.
+
+    A failed audit write is treated as a security incident — never silenced.
+    """
+
+    def __init__(self, message: str, backend: str = "", event_id: str = "") -> None:
+        super().__init__(
+            message,
+            component="audit",
+            context={"backend": backend, "event_id": event_id},
+        )
+        self.backend = backend
+        self.event_id = event_id
