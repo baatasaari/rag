@@ -1,0 +1,2146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LBG PCW Competitive Intelligence & Optimisation Platform</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --navy:    #0A1628;
+    --blue:    #1B3A6B;
+    --mid:     #2563AB;
+    --accent:  #0F7AC5;
+    --teal:    #0D9488;
+    --gold:    #C9A84C;
+    --warm:    #E8EDF5;
+    --light:   #F4F6FA;
+    --border:  #CBD5E1;
+    --text:    #1E293B;
+    --sub:     #475569;
+    --muted:   #94A3B8;
+    --white:   #FFFFFF;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #E8ECF2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    padding: 40px 20px;
+    min-height: 100vh;
+  }
+
+  /* ── Slide shell ─────────────────────────────────────── */
+  .slide {
+    width: 1024px;
+    min-height: 576px;
+    background: var(--white);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(10,22,40,.12), 0 1px 4px rgba(10,22,40,.08);
+    page-break-after: always;
+  }
+
+  /* ── Slide number badge ──────────────────────────────── */
+  .slide-num {
+    position: absolute;
+    bottom: 20px;
+    right: 28px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .08em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  /* ── Confidential footer bar ─────────────────────────── */
+  .footer-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--navy) 0%, var(--mid) 60%, var(--accent) 100%);
+  }
+
+  /* ── Accent stripe (left) ────────────────────────────── */
+  .left-stripe {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 5px;
+    background: linear-gradient(180deg, var(--navy) 0%, var(--mid) 100%);
+  }
+
+  /* ════════════════════════════════════════════════════════
+     SLIDE 1 — Cover
+  ═══════════════════════════════════════════════════════ */
+  .s1 {
+    background: var(--navy);
+    justify-content: center;
+  }
+
+  .s1 .cover-top-bar {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, var(--gold) 0%, var(--accent) 100%);
+  }
+
+  .s1 .cover-inner {
+    padding: 64px 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .s1 .lbg-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 36px;
+  }
+
+  .s1 h1 {
+    font-size: 40px;
+    font-weight: 800;
+    color: var(--white);
+    line-height: 1.15;
+    max-width: 680px;
+    margin-bottom: 12px;
+  }
+
+  .s1 h1 span { color: var(--accent); }
+
+  .s1 .cover-divider {
+    width: 56px;
+    height: 3px;
+    background: var(--gold);
+    margin: 28px 0;
+  }
+
+  .s1 .cover-subtitle {
+    font-size: 13px;
+    font-weight: 400;
+    color: #94A3B8;
+    letter-spacing: .06em;
+    margin-bottom: 56px;
+  }
+
+  .s1 .cover-pills {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .s1 .pill {
+    padding: 7px 18px;
+    border: 1px solid rgba(255,255,255,.18);
+    border-radius: 24px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: .06em;
+    color: rgba(255,255,255,.75);
+  }
+
+  .s1 .cover-exec {
+    position: absolute;
+    bottom: 40px;
+    left: 80px;
+    right: 80px;
+    padding: 20px 28px;
+    border-left: 3px solid var(--gold);
+    background: rgba(255,255,255,.04);
+  }
+
+  .s1 .cover-exec p {
+    font-size: 13px;
+    font-weight: 300;
+    color: rgba(255,255,255,.7);
+    line-height: 1.6;
+    font-style: italic;
+  }
+
+  .s1 .watermark {
+    position: absolute;
+    right: -20px; bottom: 40px;
+    font-size: 160px;
+    font-weight: 900;
+    color: rgba(255,255,255,.03);
+    line-height: 1;
+    letter-spacing: -.05em;
+    user-select: none;
+  }
+
+  /* ════════════════════════════════════════════════════════
+     Shared page header
+  ═══════════════════════════════════════════════════════ */
+  .page-header {
+    padding: 32px 64px 0 64px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+
+  .page-header .eyebrow {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+
+  .page-header h2 {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--navy);
+    line-height: 1.2;
+  }
+
+  .page-header .rule {
+    width: 40px; height: 3px;
+    background: var(--gold);
+    margin-top: 10px;
+  }
+
+  /* ════════════════════════════════════════════════════════
+     SLIDE 2 — Executive Summary
+  ═══════════════════════════════════════════════════════ */
+  .s2 .body {
+    padding: 28px 64px 40px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+    flex: 1;
+  }
+
+  .exec-card {
+    background: var(--light);
+    border-top: 3px solid var(--mid);
+    padding: 24px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .exec-card.highlight {
+    background: var(--navy);
+    border-top: 3px solid var(--gold);
+  }
+
+  .exec-card .ec-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .exec-card.highlight .ec-label { color: var(--gold); }
+
+  .exec-card .ec-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--navy);
+    line-height: 1.3;
+  }
+
+  .exec-card.highlight .ec-title { color: var(--white); }
+
+  .exec-card p {
+    font-size: 12.5px;
+    font-weight: 400;
+    color: var(--sub);
+    line-height: 1.6;
+  }
+
+  .exec-card.highlight p { color: rgba(255,255,255,.7); }
+
+  .s2 .outcomes-row {
+    padding: 0 64px 36px;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+  }
+
+  .outcome-chip {
+    background: var(--warm);
+    border-left: 3px solid var(--teal);
+    padding: 10px 12px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.4;
+  }
+
+  /* ════════════════════════════════════════════════════════
+     SLIDE 3 — Why This Matters (2×2 grid)
+  ═══════════════════════════════════════════════════════ */
+  .s3 .body {
+    padding: 28px 64px 44px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    flex: 1;
+  }
+
+  .why-card {
+    border: 1px solid var(--border);
+    padding: 24px 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    position: relative;
+  }
+
+  .why-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--mid);
+  }
+
+  .why-card:nth-child(1)::before { background: var(--accent); }
+  .why-card:nth-child(2)::before { background: var(--teal); }
+  .why-card:nth-child(3)::before { background: var(--gold); }
+  .why-card:nth-child(4)::before { background: #DC2626; }
+
+  .why-card .wc-icon {
+    font-size: 22px;
+    margin-bottom: 2px;
+  }
+
+  .why-card h3 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--navy);
+  }
+
+  .why-card ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .why-card ul li {
+    font-size: 12px;
+    color: var(--sub);
+    padding-left: 14px;
+    position: relative;
+    line-height: 1.5;
+  }
+
+  .why-card ul li::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  .why-card .badge {
+    align-self: flex-start;
+    margin-top: auto;
+    background: var(--navy);
+    color: var(--white);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+  }
+
+  /* ════════════════════════════════════════════════════════
+     SLIDE 4 — Current State (linear flow)
+  ═══════════════════════════════════════════════════════ */
+  .s4 .body {
+    padding: 32px 64px 44px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    flex: 1;
+  }
+
+  .s4 .flow-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0;
+  }
+
+  .flow-step {
+    position: relative;
+    padding: 24px 20px 24px 24px;
+    background: var(--light);
+    border-right: 1px solid var(--border);
+  }
+
+  .flow-step:last-child { border-right: none; }
+
+  .flow-step::after {
+    content: '›';
+    position: absolute;
+    right: -10px; top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+    color: var(--muted);
+    z-index: 2;
+  }
+
+  .flow-step:last-child::after { display: none; }
+
+  .flow-step .fs-num {
+    font-size: 28px;
+    font-weight: 900;
+    color: rgba(37,99,171,.12);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .flow-step h4 {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--navy);
+    margin-bottom: 8px;
+  }
+
+  .flow-step p {
+    font-size: 11.5px;
+    color: var(--sub);
+    line-height: 1.55;
+  }
+
+  .s4 .result-box {
+    background: #FEF3C7;
+    border-left: 4px solid var(--gold);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .s4 .result-box .rb-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: #92400E;
+    white-space: nowrap;
+  }
+
+  .s4 .result-box p {
+    font-size: 13px;
+    color: #78350F;
+    font-weight: 500;
+  }
+
+  /* ════════════════════════════════════════════════════════
+     SLIDE 5 — Strategic Hypothesis
+  ═══════════════════════════════════════════════════════ */
+  .s5 {
+    background: var(--light);
+  }
+
+  .s5 .body {
+    padding: 32px 80px 48px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    flex: 1;
+    justify-content: center;
+  }
+
+  .hyp-block {
+    display: flex;
+    gap: 0;
+    align-items: stretch;
+  }
+
+  .hyp-label {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--white);
+    background: var(--navy);
+    padding: 20px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+  }
+
+  .hyp-content {
+    flex: 1;
+    padding: 20px 28px;
+    border: 1px solid var(--border);
+    border-left: none;
+    background: var(--white);
+  }
+
+  .hyp-content p {
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.65;
+  }
+
+  .hyp-connector {
+    height: 28px;
+    margin-left: 36px;
+    display: flex;
+    align-items: center;
+    padding-left: 28px;
+  }
+
+  .hyp-connector span {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border-left: 2px solid var(--accent);
+    padding-left: 10px;
+  }
+
+  .hyp-result {
+    margin-top: 28px;
+    background: var(--navy);
+    padding: 22px 28px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .hyp-result .ri-label {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .16em;
+    color: var(--gold);
+    white-space: nowrap;
+  }
+
+  .hyp-result p {
+    font-size: 14px;
+    color: var(--white);
+    font-weight: 400;
+    line-height: 1.5;
+  }
+
+  /* ════════════════════════════════════════════════════════
+     SLIDE 6 — Target Operating Model
+  ═══════════════════════════════════════════════════════ */
+  .s6 .body {
+    padding: 28px 64px 44px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 16px;
+  }
+
+  .tom-row {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    flex: 1;
+  }
+
+  .tom-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 10px;
+    padding: 20px 12px;
+    border: 1px solid var(--border);
+    position: relative;
+  }
+
+  .tom-step::after {
+    content: '›';
+    position: absolute;
+    right: -10px; top: 50%;
+    transform: translateY(-50%);
+    font-size: 18px;
+    color: var(--muted);
+    z-index: 2;
+    background: var(--white);
+    padding: 2px;
+  }
+
+  .tom-step:last-child::after { display: none; }
+
+  .tom-step .ts-num {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--navy);
+    color: var(--white);
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .tom-step h4 {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--navy);
+  }
+
+  .tom-step p {
+    font-size: 10.5px;
+    color: var(--sub);
+    line-height: 1.5;
+  }
+
+  .tom-step:nth-child(1) .ts-num { background: var(--accent); }
+  .tom-step:nth-child(2) .ts-num { background: var(--mid); }
+  .tom-step:nth-child(3) .ts-num { background: var(--teal); }
+  .tom-step:nth-child(4) .ts-num { background: #7C3AED; }
+  .tom-step:nth-child(5) .ts-num { background: var(--gold); }
+  .tom-step:nth-child(6) .ts-num { background: #059669; }
+  .tom-step:nth-child(7) .ts-num { background: #DC2626; }
+
+  /* ════════════════════════════════════════════════════════
+     SLIDE 7 — Value Creation Framework
+  ═══════════════════════════════════════════════════════ */
+  .s7 .body {
+    padding: 28px 64px 44px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    flex: 1;
+  }
+
+  .value-pillar {
+    border: 1px solid var(--border);
+    padding: 24px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .value-pillar .vp-color-bar {
+    height: 3px;
+    margin-bottom: 4px;
+  }
+
+  .value-pillar:nth-child(1) .vp-color-bar { background: var(--accent); }
+  .value-pillar:nth-child(2) .vp-color-bar { background: var(--teal); }
+  .value-pillar:nth-child(3) .vp-color-bar { background: var(--gold); }
+  .value-pillar:nth-child(4) .vp-color-bar { background: #7C3AED; }
+
+  .value-pillar h3 {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--navy);
+  }
+
+  .value-pillar ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .value-pillar ul li {
+    font-size: 12px;
+    color: var(--sub);
+    padding-left: 14px;
+    position: relative;
+    line-height: 1.5;
+  }
+
+  .value-pillar ul li::before {
+    content: '●';
+    position: absolute;
+    left: 0;
+    font-size: 7px;
+    top: 4px;
+    color: var(--accent);
+  }
+
+  .value-pillar:nth-child(2) ul li::before { color: var(--teal); }
+  .value-pillar:nth-child(3) ul li::before { color: var(--gold); }
+  .value-pillar:nth-child(4) ul li::before { color: #7C3AED; }
+
+  /* ════════════════════════════════════════════════════════
+     SLIDE 8 — Architecture
+  ═══════════════════════════════════════════════════════ */
+  .s8 .body {
+    padding: 24px 64px 40px;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    flex: 1;
+  }
+
+  .arch-layer {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .arch-layer-header {
+    background: var(--navy);
+    color: var(--white);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    padding: 10px 12px;
+    text-align: center;
+  }
+
+  .arch-layer:nth-child(2) .arch-layer-header { background: var(--mid); }
+  .arch-layer:nth-child(3) .arch-layer-header { background: var(--teal); }
+  .arch-layer:nth-child(4) .arch-layer-header { background: #7C3AED; }
+  .arch-layer:nth-child(5) .arch-layer-header { background: #059669; }
+
+  .arch-item {
+    background: var(--light);
+    border: 1px solid var(--border);
+    padding: 10px 12px;
+    font-size: 11.5px;
+    color: var(--text);
+    font-weight: 500;
+    line-height: 1.4;
+  }
+
+  /* ════════════════════════════════════════════════════════
+     SLIDE 9 — Agentic Architecture
+  ═══════════════════════════════════════════════════════ */
+  .s9 .body {
+    padding: 24px 64px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    flex: 1;
+  }
+
+  .agent-orchestrator {
+    background: var(--navy);
+    color: var(--white);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .agent-orchestrator .ao-label {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--gold);
+    white-space: nowrap;
+  }
+
+  .agent-orchestrator p {
+    font-size: 12px;
+    color: rgba(255,255,255,.8);
+  }
+
+  .agents-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    flex: 1;
+  }
+
+  .agent-card {
+    border: 1px solid var(--border);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    position: relative;
+  }
+
+  .agent-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--accent);
+  }
+
+  .agent-card:nth-child(2)::before { background: var(--mid); }
+  .agent-card:nth-child(3)::before { background: var(--teal); }
+  .agent-card:nth-child(4)::before { background: #7C3AED; }
+  .agent-card:nth-child(5)::before { background: var(--gold); }
+  .agent-card:nth-child(6)::before { background: #DC2626; }
+  .agent-card:nth-child(7)::before { background: #059669; }
+  .agent-card:nth-child(8)::before { background: #0891B2; }
+
+  .agent-card .ac-num {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .agent-card h4 {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--navy);
+    line-height: 1.3;
+  }
+
+  .agent-card p {
+    font-size: 11px;
+    color: var(--sub);
+    line-height: 1.5;
+  }
+
+  /* ════════════════════════════════════════════════════════
+     SLIDE 10 — Integration Architecture
+  ═══════════════════════════════════════════════════════ */
+  .s10 .body {
+    padding: 28px 64px 44px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    flex: 1;
+  }
+
+  .int-investments h3 {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 14px;
+  }
+
+  .int-tag-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .int-tag {
+    padding: 10px 16px;
+    background: var(--light);
+    border-left: 3px solid var(--mid);
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .int-tag span {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--muted);
+  }
+
+  .int-principle {
+    background: var(--navy);
+    padding: 16px 20px;
+    margin-top: 14px;
+    border-left: 3px solid var(--gold);
+  }
+
+  .int-principle p {
+    font-size: 12px;
+    color: rgba(255,255,255,.8);
+    font-style: italic;
+    line-height: 1.6;
+  }
+
+  .int-flow {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .int-flow h3 {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 10px;
+  }
+
+  .flow-node {
+    padding: 10px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--white);
+    background: var(--navy);
+    text-align: center;
+  }
+
+  .flow-node.external { background: var(--accent); }
+  .flow-node.platform { background: var(--mid); }
+  .flow-node.api { background: #475569; }
+  .flow-node.system { background: var(--teal); }
+  .flow-node.gov { background: #7C3AED; }
+  .flow-node.user { background: #059669; }
+
+  .flow-arrow {
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    font-size: 16px;
+  }
+
+  /* ════════════════════════════════════════════════════════
+     SLIDE 11 — Human in the Loop
+  ═══════════════════════════════════════════════════════ */
+  .s11 .body {
+    padding: 28px 64px 44px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 16px;
+  }
+
+  .hitl-tiers {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+  }
+
+  .hitl-tier {
+    display: grid;
+    grid-template-columns: 60px 100px 1fr auto;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 20px;
+    background: var(--light);
+    border: 1px solid var(--border);
+  }
+
+  .hitl-tier .tier-num {
+    font-size: 20px;
+    font-weight: 900;
+    color: rgba(37,99,171,.15);
+    line-height: 1;
+    text-align: center;
+  }
+
+  .hitl-tier .tier-badge {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    text-align: center;
+  }
+
+  .hitl-tier:nth-child(1) .tier-badge { background: #DCFCE7; color: #166534; }
+  .hitl-tier:nth-child(2) .tier-badge { background: #DBEAFE; color: #1E40AF; }
+  .hitl-tier:nth-child(3) .tier-badge { background: #FEF3C7; color: #92400E; }
+  .hitl-tier:nth-child(4) .tier-badge { background: #F3E8FF; color: #6B21A8; }
+  .hitl-tier:nth-child(5) .tier-badge { background: #FEE2E2; color: #991B1B; }
+
+  .hitl-tier p {
+    font-size: 12.5px;
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .hitl-tier .tier-auto {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .hitl-tier:nth-child(1) .tier-auto { color: #166534; }
+  .hitl-tier:nth-child(3) .tier-auto { color: #92400E; }
+
+  .hitl-principle {
+    background: var(--navy);
+    padding: 14px 24px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--white);
+    letter-spacing: .04em;
+  }
+
+  .hitl-principle span { color: var(--gold); }
+
+  /* ════════════════════════════════════════════════════════
+     SLIDE 12 — Governance & Risk
+  ═══════════════════════════════════════════════════════ */
+  .s12 .body {
+    padding: 28px 64px 44px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    flex: 1;
+  }
+
+  .gov-card {
+    padding: 20px 18px;
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .gov-card .gc-icon {
+    width: 32px; height: 32px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    margin-bottom: 4px;
+  }
+
+  .gov-card:nth-child(1) .gc-icon { background: #DBEAFE; }
+  .gov-card:nth-child(2) .gc-icon { background: #DCFCE7; }
+  .gov-card:nth-child(3) .gc-icon { background: #FEF3C7; }
+  .gov-card:nth-child(4) .gc-icon { background: #FCE7F3; }
+  .gov-card:nth-child(5) .gc-icon { background: #F3E8FF; }
+  .gov-card:nth-child(6) .gc-icon { background: #FEE2E2; }
+
+  .gov-card h4 {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--navy);
+  }
+
+  .gov-card p {
+    font-size: 12px;
+    color: var(--sub);
+    line-height: 1.55;
+  }
+
+  /* ════════════════════════════════════════════════════════
+     SLIDE 13 — KPI Framework
+  ═══════════════════════════════════════════════════════ */
+  .s13 .body {
+    padding: 28px 64px 44px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    flex: 1;
+  }
+
+  .kpi-col {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .kpi-col-header {
+    padding: 12px 14px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--white);
+    background: var(--navy);
+  }
+
+  .kpi-col:nth-child(1) .kpi-col-header { background: var(--accent); }
+  .kpi-col:nth-child(2) .kpi-col-header { background: var(--mid); }
+  .kpi-col:nth-child(3) .kpi-col-header { background: var(--teal); }
+  .kpi-col:nth-child(4) .kpi-col-header { background: #DC2626; }
+
+  .kpi-item {
+    padding: 10px 14px;
+    background: var(--light);
+    border-left: 3px solid var(--border);
+    font-size: 12px;
+    color: var(--text);
+    font-weight: 500;
+    line-height: 1.4;
+  }
+
+  .kpi-col:nth-child(1) .kpi-item { border-left-color: var(--accent); }
+  .kpi-col:nth-child(2) .kpi-item { border-left-color: var(--mid); }
+  .kpi-col:nth-child(3) .kpi-item { border-left-color: var(--teal); }
+  .kpi-col:nth-child(4) .kpi-item { border-left-color: #DC2626; }
+
+  /* ════════════════════════════════════════════════════════
+     SLIDE 14 — Roadmap
+  ═══════════════════════════════════════════════════════ */
+  .s14 .body {
+    padding: 28px 64px 44px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    flex: 1;
+  }
+
+  .roadmap-timeline {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    flex: 1;
+  }
+
+  .wave-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  .wave-header {
+    padding: 14px 16px;
+    background: var(--navy);
+    color: var(--white);
+  }
+
+  .wave-card:nth-child(1) .wave-header { background: var(--accent); }
+  .wave-card:nth-child(2) .wave-header { background: var(--mid); }
+  .wave-card:nth-child(3) .wave-header { background: var(--teal); }
+  .wave-card:nth-child(4) .wave-header { background: #7C3AED; }
+
+  .wave-header .wh-wave {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.7);
+    margin-bottom: 4px;
+  }
+
+  .wave-header .wh-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--white);
+  }
+
+  .wave-header .wh-months {
+    font-size: 11px;
+    color: rgba(255,255,255,.7);
+    margin-top: 4px;
+  }
+
+  .wave-items {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+    background: var(--white);
+  }
+
+  .wave-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text);
+    line-height: 1.4;
+  }
+
+  .wave-item::before {
+    content: '✓';
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--teal);
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+
+  /* ════════════════════════════════════════════════════════
+     SLIDE 15 — Business Value
+  ═══════════════════════════════════════════════════════ */
+  .s15 .body {
+    padding: 28px 64px 44px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 16px;
+    flex: 1;
+  }
+
+  .bv-card {
+    border: 1px solid var(--border);
+    padding: 28px 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .bv-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; right: 0;
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    opacity: .06;
+  }
+
+  .bv-card:nth-child(1)::after { background: var(--accent); }
+  .bv-card:nth-child(2)::after { background: var(--teal); }
+  .bv-card:nth-child(3)::after { background: var(--gold); }
+  .bv-card:nth-child(4)::after { background: #7C3AED; }
+
+  .bv-card .bv-icon {
+    font-size: 28px;
+    line-height: 1;
+  }
+
+  .bv-card h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--navy);
+  }
+
+  .bv-card p {
+    font-size: 12.5px;
+    color: var(--sub);
+    line-height: 1.6;
+  }
+
+  /* ════════════════════════════════════════════════════════
+     SLIDE 16 — Recommendation (closing)
+  ═══════════════════════════════════════════════════════ */
+  .s16 {
+    background: var(--navy);
+  }
+
+  .s16 .cover-top-bar {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, var(--gold) 0%, var(--accent) 100%);
+  }
+
+  .s16 .body {
+    padding: 48px 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    flex: 1;
+  }
+
+  .s16 .rec-label {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+
+  .s16 .rec-box {
+    background: rgba(255,255,255,.06);
+    border-left: 4px solid var(--gold);
+    padding: 20px 24px;
+  }
+
+  .s16 .rec-box p {
+    font-size: 14px;
+    color: var(--white);
+    line-height: 1.65;
+    font-weight: 400;
+  }
+
+  .s16 h3 {
+    font-size: 13px;
+    font-weight: 700;
+    color: rgba(255,255,255,.6);
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    margin-top: 8px;
+  }
+
+  .s16 .next-steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  .ns-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .ns-item .ns-num {
+    width: 24px; height: 24px;
+    background: var(--gold);
+    color: var(--navy);
+    font-size: 11px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .ns-item p {
+    font-size: 12px;
+    color: rgba(255,255,255,.75);
+    line-height: 1.5;
+    font-weight: 400;
+    padding-top: 3px;
+  }
+
+  .s16 .closing-msg {
+    margin-top: auto;
+    border-top: 1px solid rgba(255,255,255,.12);
+    padding-top: 20px;
+    font-size: 15px;
+    font-weight: 600;
+    color: rgba(255,255,255,.85);
+    letter-spacing: .02em;
+    font-style: italic;
+  }
+
+  .s16 .watermark {
+    position: absolute;
+    right: -10px; bottom: 30px;
+    font-size: 130px;
+    font-weight: 900;
+    color: rgba(255,255,255,.03);
+    line-height: 1;
+    user-select: none;
+  }
+
+  /* Print */
+  @media print {
+    body { background: white; padding: 0; gap: 0; }
+    .slide { box-shadow: none; width: 100%; page-break-after: always; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══ SLIDE 1 ══════════════════════════════════════════════ -->
+<div class="slide s1">
+  <div class="cover-top-bar"></div>
+
+  <div class="cover-inner">
+    <div class="lbg-label">Lloyds Banking Group · General Insurance</div>
+    <h1>PCW Competitive Intelligence<br>&amp; <span>Optimisation</span> Platform</h1>
+    <div class="cover-divider"></div>
+    <div class="cover-subtitle">Transforming Market Monitoring into Continuous Competitive Advantage</div>
+
+    <div class="cover-pills">
+      <div class="pill">Agentic Intelligence</div>
+      <div class="pill">Human-Governed Decisioning</div>
+      <div class="pill">Closed-Loop Optimisation</div>
+      <div class="pill">Price Comparison Websites</div>
+    </div>
+  </div>
+
+  <div class="cover-exec">
+    <p>Move from periodic competitor reviews to continuous market sensing, intelligence generation and optimisation recommendations across Price Comparison Websites.</p>
+  </div>
+
+  <div class="watermark">LBG</div>
+  <div class="slide-num">01 / 16</div>
+</div>
+
+<!-- ══ SLIDE 2 ══════════════════════════════════════════════ -->
+<div class="slide s2">
+  <div class="left-stripe"></div>
+  <div class="page-header">
+    <div>
+      <div class="eyebrow">Executive Summary</div>
+      <h2>Strategic Context &amp; Recommendation</h2>
+      <div class="rule"></div>
+    </div>
+  </div>
+
+  <div class="body">
+    <div class="exec-card">
+      <div class="ec-label">The Opportunity</div>
+      <div class="ec-title">PCWs remain one of the most influential acquisition channels in UK General Insurance</div>
+      <p>Price Comparison Websites continue to shape customer acquisition at scale, creating significant leverage for firms that can optimise their positioning effectively.</p>
+    </div>
+    <div class="exec-card">
+      <div class="ec-label">The Challenge</div>
+      <div class="ec-title">Competitor movements occur daily while organisational responses are fragmented and reactive</div>
+      <p>Manual, periodic reviews are unable to keep pace with the velocity and complexity of market movements across all PCW channels simultaneously.</p>
+    </div>
+    <div class="exec-card highlight">
+      <div class="ec-label">The Recommendation</div>
+      <div class="ec-title">Establish an Agentic AI-powered Competitive Intelligence & Optimisation Platform</div>
+      <p>Continuously monitor, analyse and recommend actions across pricing, product and proposition teams — governed by human oversight at every decision point.</p>
+    </div>
+  </div>
+
+  <div class="outcomes-row">
+    <div class="outcome-chip">Improved PCW ranking visibility</div>
+    <div class="outcome-chip">Faster response to competitor movements</div>
+    <div class="outcome-chip">Better-informed pricing decisions</div>
+    <div class="outcome-chip">Reduced manual analysis effort</div>
+    <div class="outcome-chip">Reusable strategic capability</div>
+  </div>
+
+  <div class="footer-bar"></div>
+  <div class="slide-num">02 / 16</div>
+</div>
+
+<!-- ══ SLIDE 3 ══════════════════════════════════════════════ -->
+<div class="slide s3">
+  <div class="left-stripe"></div>
+  <div class="page-header">
+    <div>
+      <div class="eyebrow">Market Context</div>
+      <h2>Why This Matters</h2>
+      <div class="rule"></div>
+    </div>
+  </div>
+
+  <div class="body">
+    <div class="why-card">
+      <div class="wc-icon">📊</div>
+      <h3>PCWs Drive Significant Customer Acquisition</h3>
+      <ul>
+        <li>Price</li>
+        <li>Excess</li>
+        <li>Product features</li>
+        <li>Optional add-ons</li>
+        <li>Brand perception</li>
+      </ul>
+      <div class="badge">High Influence</div>
+    </div>
+    <div class="why-card">
+      <div class="wc-icon">📈</div>
+      <h3>Ranking Position Drives Commercial Outcomes</h3>
+      <ul>
+        <li>Quote volumes impacted by positioning</li>
+        <li>Conversion rates sensitive to rank</li>
+        <li>New business growth at stake</li>
+      </ul>
+      <div class="badge">Commercial Impact</div>
+    </div>
+    <div class="why-card">
+      <div class="wc-icon">⚡</div>
+      <h3>Market Dynamics Change Daily</h3>
+      <ul>
+        <li>Pricing adjustments by competitors</li>
+        <li>Offer changes and promotions</li>
+        <li>Product enhancements</li>
+        <li>Underwriting updates</li>
+      </ul>
+      <div class="badge">High Velocity</div>
+    </div>
+    <div class="why-card">
+      <div class="wc-icon">🚧</div>
+      <h3>Current Monitoring Cannot Scale</h3>
+      <ul>
+        <li>Manual processes lag market movement</li>
+        <li>Coverage is partial and inconsistent</li>
+        <li>Analysis siloed across teams</li>
+        <li>Response latency is significant</li>
+      </ul>
+      <div class="badge" style="background:#DC2626;">Constraint</div>
+    </div>
+  </div>
+
+  <div class="footer-bar"></div>
+  <div class="slide-num">03 / 16</div>
+</div>
+
+<!-- ══ SLIDE 4 ══════════════════════════════════════════════ -->
+<div class="slide s4">
+  <div class="left-stripe"></div>
+  <div class="page-header">
+    <div>
+      <div class="eyebrow">Current State Assessment</div>
+      <h2>How We Operate Today</h2>
+      <div class="rule"></div>
+    </div>
+  </div>
+
+  <div class="body">
+    <div class="flow-row">
+      <div class="flow-step">
+        <div class="fs-num">01</div>
+        <h4>Monitoring</h4>
+        <p>Market reviews performed periodically across multiple PCWs</p>
+      </div>
+      <div class="flow-step">
+        <div class="fs-num">02</div>
+        <h4>Analysis</h4>
+        <p>Information collected manually and interpreted separately by teams</p>
+      </div>
+      <div class="flow-step">
+        <div class="fs-num">03</div>
+        <h4>Decision Making</h4>
+        <p>Changes initiated after trends become visible — often delayed</p>
+      </div>
+      <div class="flow-step">
+        <div class="fs-num">04</div>
+        <h4>Execution</h4>
+        <p>Multiple handoffs across pricing, product and operations</p>
+      </div>
+      <div class="flow-step">
+        <div class="fs-num">05</div>
+        <h4>Outcome</h4>
+        <p>Reactive response model — unable to anticipate market shifts</p>
+      </div>
+    </div>
+
+    <div class="result-box">
+      <div class="rb-label">⚠ Current Result</div>
+      <p>Reactive rather than proactive market response — competitor advantage ceded during monitoring gaps</p>
+    </div>
+  </div>
+
+  <div class="footer-bar"></div>
+  <div class="slide-num">04 / 16</div>
+</div>
+
+<!-- ══ SLIDE 5 ══════════════════════════════════════════════ -->
+<div class="slide s5">
+  <div class="left-stripe"></div>
+  <div class="page-header">
+    <div>
+      <div class="eyebrow">Strategic Rationale</div>
+      <h2>The Strategic Hypothesis</h2>
+      <div class="rule"></div>
+    </div>
+  </div>
+
+  <div class="body">
+    <div class="hyp-block">
+      <div class="hyp-label">If</div>
+      <div class="hyp-content">
+        <p>LBG <strong>continuously captures</strong> competitor market signals across all active PCW channels in real time</p>
+      </div>
+    </div>
+
+    <div class="hyp-connector"><span>And</span></div>
+
+    <div class="hyp-block">
+      <div class="hyp-label" style="background:var(--mid);">And</div>
+      <div class="hyp-content">
+        <p><strong>Automatically analyses</strong> ranking movement, pricing shifts and proposition changes using Agentic AI capabilities</p>
+      </div>
+    </div>
+
+    <div class="hyp-connector"><span>Then</span></div>
+
+    <div class="hyp-block">
+      <div class="hyp-label" style="background:var(--teal);">Then</div>
+      <div class="hyp-content">
+        <p>Decision-makers can <strong>identify opportunities faster</strong>, with greater confidence and evidence</p>
+      </div>
+    </div>
+
+    <div class="hyp-result">
+      <div class="ri-label">Resulting In</div>
+      <p>Improved competitiveness, better conversion performance and enhanced operational efficiency across PCW channels</p>
+    </div>
+  </div>
+
+  <div class="footer-bar"></div>
+  <div class="slide-num">05 / 16</div>
+</div>
+
+<!-- ══ SLIDE 6 ══════════════════════════════════════════════ -->
+<div class="slide s6">
+  <div class="left-stripe"></div>
+  <div class="page-header">
+    <div>
+      <div class="eyebrow">Operating Model</div>
+      <h2>Target Operating Model — Seven-Stage Cycle</h2>
+      <div class="rule"></div>
+    </div>
+  </div>
+
+  <div class="body">
+    <div class="tom-row">
+      <div class="tom-step">
+        <div class="ts-num">1</div>
+        <h4>Sense</h4>
+        <p>Capture market movements continuously</p>
+      </div>
+      <div class="tom-step">
+        <div class="ts-num">2</div>
+        <h4>Analyse</h4>
+        <p>Identify patterns, ranking changes and competitor behaviour</p>
+      </div>
+      <div class="tom-step">
+        <div class="ts-num">3</div>
+        <h4>Simulate</h4>
+        <p>Evaluate potential interventions before implementation</p>
+      </div>
+      <div class="tom-step">
+        <div class="ts-num">4</div>
+        <h4>Recommend</h4>
+        <p>Generate pricing, offer and proposition recommendations</p>
+      </div>
+      <div class="tom-step">
+        <div class="ts-num">5</div>
+        <h4>Govern</h4>
+        <p>Apply human approval and oversight controls</p>
+      </div>
+      <div class="tom-step">
+        <div class="ts-num">6</div>
+        <h4>Execute</h4>
+        <p>Implement approved changes across systems</p>
+      </div>
+      <div class="tom-step">
+        <div class="ts-num">7</div>
+        <h4>Learn</h4>
+        <p>Measure outcomes and continuously improve recommendations</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-bar"></div>
+  <div class="slide-num">06 / 16</div>
+</div>
+
+<!-- ══ SLIDE 7 ══════════════════════════════════════════════ -->
+<div class="slide s7">
+  <div class="left-stripe"></div>
+  <div class="page-header">
+    <div>
+      <div class="eyebrow">Value Framework</div>
+      <h2>Value Creation — Four Dimensions</h2>
+      <div class="rule"></div>
+    </div>
+  </div>
+
+  <div class="body">
+    <div class="value-pillar">
+      <div class="vp-color-bar"></div>
+      <h3>Increase New Business Growth</h3>
+      <ul>
+        <li>Improved PCW ranking position</li>
+        <li>Enhanced pricing competitiveness</li>
+        <li>Stronger product competitiveness</li>
+        <li>Better offer competitiveness</li>
+      </ul>
+    </div>
+    <div class="value-pillar">
+      <div class="vp-color-bar"></div>
+      <h3>Improve Decision Quality</h3>
+      <ul>
+        <li>Better, evidence-based insights</li>
+        <li>Faster, more reliable recommendations</li>
+        <li>Evidence-based interventions</li>
+        <li>Reduced subjectivity in decisions</li>
+      </ul>
+    </div>
+    <div class="value-pillar">
+      <div class="vp-color-bar"></div>
+      <h3>Improve Market Responsiveness</h3>
+      <ul>
+        <li>Continuous, real-time monitoring</li>
+        <li>Significantly reduced response latency</li>
+        <li>Earlier competitor movement detection</li>
+        <li>Proactive rather than reactive posture</li>
+      </ul>
+    </div>
+    <div class="value-pillar">
+      <div class="vp-color-bar"></div>
+      <h3>Reduce Operational Effort</h3>
+      <ul>
+        <li>Automated intelligence gathering</li>
+        <li>Significantly reduced manual analysis</li>
+        <li>Scalable market coverage</li>
+        <li>Reusable platform capability</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="footer-bar"></div>
+  <div class="slide-num">07 / 16</div>
+</div>
+
+<!-- ══ SLIDE 8 ══════════════════════════════════════════════ -->
+<div class="slide s8">
+  <div class="left-stripe"></div>
+  <div class="page-header">
+    <div>
+      <div class="eyebrow">Capability Architecture</div>
+      <h2>Competitive Intelligence — Five-Layer Architecture</h2>
+      <div class="rule"></div>
+    </div>
+  </div>
+
+  <div class="body">
+    <div class="arch-layer">
+      <div class="arch-layer-header">Market Intelligence</div>
+      <div class="arch-item">Ranking monitoring</div>
+      <div class="arch-item">Competitor monitoring</div>
+      <div class="arch-item">Product monitoring</div>
+      <div class="arch-item">Offer monitoring</div>
+    </div>
+    <div class="arch-layer">
+      <div class="arch-layer-header">Insight Layer</div>
+      <div class="arch-item">Trend detection</div>
+      <div class="arch-item">Competitive analysis</div>
+      <div class="arch-item">Gap analysis</div>
+      <div class="arch-item">Opportunity identification</div>
+    </div>
+    <div class="arch-layer">
+      <div class="arch-layer-header">Recommendation</div>
+      <div class="arch-item">Pricing recommendations</div>
+      <div class="arch-item">Offer recommendations</div>
+      <div class="arch-item">Product recommendations</div>
+      <div class="arch-item" style="background:var(--warm); font-style:italic; color:var(--muted);">Simulation outputs</div>
+    </div>
+    <div class="arch-layer">
+      <div class="arch-layer-header">Governance</div>
+      <div class="arch-item">Human approval workflows</div>
+      <div class="arch-item">Audit controls</div>
+      <div class="arch-item">Compliance controls</div>
+      <div class="arch-item" style="background:var(--warm); font-style:italic; color:var(--muted);">Explainability layer</div>
+    </div>
+    <div class="arch-layer">
+      <div class="arch-layer-header">Execution</div>
+      <div class="arch-item">AGGS</div>
+      <div class="arch-item">Duck Creek</div>
+      <div class="arch-item">Pricing Services</div>
+      <div class="arch-item">Product Services</div>
+    </div>
+  </div>
+
+  <div class="footer-bar"></div>
+  <div class="slide-num">08 / 16</div>
+</div>
+
+<!-- ══ SLIDE 9 ══════════════════════════════════════════════ -->
+<div class="slide s9">
+  <div class="left-stripe"></div>
+  <div class="page-header">
+    <div>
+      <div class="eyebrow">Agentic AI Design</div>
+      <h2>Multi-Agent Intelligence Architecture</h2>
+      <div class="rule"></div>
+    </div>
+  </div>
+
+  <div class="body">
+    <div class="agent-orchestrator">
+      <div class="ao-label">Orchestrator Agent</div>
+      <p>Coordinates end-to-end workflow — routes tasks, aggregates outputs, manages state and escalates to human governance tiers as required</p>
+    </div>
+    <div class="agents-grid">
+      <div class="agent-card">
+        <div class="ac-num">Agent 01</div>
+        <h4>Market Collection</h4>
+        <p>Captures competitor data continuously across all active PCW channels</p>
+      </div>
+      <div class="agent-card">
+        <div class="ac-num">Agent 02</div>
+        <h4>Position Intelligence</h4>
+        <p>Determines ranking movement, velocity and emerging trends</p>
+      </div>
+      <div class="agent-card">
+        <div class="ac-num">Agent 03</div>
+        <h4>Competitor Analysis</h4>
+        <p>Identifies market changes, drivers and underlying competitor strategies</p>
+      </div>
+      <div class="agent-card">
+        <div class="ac-num">Agent 04</div>
+        <h4>Pricing Intelligence</h4>
+        <p>Assesses pricing competitiveness and gaps versus market</p>
+      </div>
+      <div class="agent-card">
+        <div class="ac-num">Agent 05</div>
+        <h4>Proposition Intelligence</h4>
+        <p>Evaluates product and offer positioning relative to competitors</p>
+      </div>
+      <div class="agent-card">
+        <div class="ac-num">Agent 06</div>
+        <h4>Simulation</h4>
+        <p>Models likely outcomes of proposed pricing or proposition actions</p>
+      </div>
+      <div class="agent-card">
+        <div class="ac-num">Agent 07</div>
+        <h4>Recommendation</h4>
+        <p>Produces actionable, evidence-based recommendations for human review</p>
+      </div>
+      <div class="agent-card">
+        <div class="ac-num">Agent 08</div>
+        <h4>Learning</h4>
+        <p>Measures effectiveness and continuously improves future recommendations</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-bar"></div>
+  <div class="slide-num">09 / 16</div>
+</div>
+
+<!-- ══ SLIDE 10 ══════════════════════════════════════════════ -->
+<div class="slide s10">
+  <div class="left-stripe"></div>
+  <div class="page-header">
+    <div>
+      <div class="eyebrow">Systems Integration</div>
+      <h2>Integration with Existing LBG Architecture</h2>
+      <div class="rule"></div>
+    </div>
+  </div>
+
+  <div class="body">
+    <div class="int-investments">
+      <h3>Existing Strategic Investments Reused</h3>
+      <div class="int-tag-list">
+        <div class="int-tag">AGGS <span>Aggregation Gateway</span></div>
+        <div class="int-tag">Apigee <span>API Management</span></div>
+        <div class="int-tag">Pega <span>Governance &amp; Workflow</span></div>
+        <div class="int-tag">Duck Creek <span>Policy &amp; Rating</span></div>
+        <div class="int-tag">Pricing Services <span>Rate Calculation</span></div>
+        <div class="int-tag">Product Services <span>Product Configuration</span></div>
+      </div>
+      <div class="int-principle">
+        <p>"Enhance existing capabilities rather than create parallel operating models — platform extensibility over duplication."</p>
+      </div>
+    </div>
+    <div class="int-flow">
+      <h3>Data &amp; Decision Flow</h3>
+      <div class="flow-node external">PCWs — Market Data Source</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-node platform">Competitive Intelligence Platform</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-node api">Apigee — API Management Layer</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-node system">AGGS · Duck Creek · Pricing Services</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-node gov">Pega — Governance &amp; Approval</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-node user">Business Users — Decision &amp; Oversight</div>
+    </div>
+  </div>
+
+  <div class="footer-bar"></div>
+  <div class="slide-num">10 / 16</div>
+</div>
+
+<!-- ══ SLIDE 11 ══════════════════════════════════════════════ -->
+<div class="slide s11">
+  <div class="left-stripe"></div>
+  <div class="page-header">
+    <div>
+      <div class="eyebrow">Governance Design</div>
+      <h2>Human-in-the-Loop Decision Model</h2>
+      <div class="rule"></div>
+    </div>
+  </div>
+
+  <div class="body">
+    <div class="hitl-tiers">
+      <div class="hitl-tier">
+        <div class="tier-num">1</div>
+        <div class="tier-badge">AUTO</div>
+        <p>Market monitoring and analysis — continuous, fully automated data collection and pattern detection</p>
+        <div class="tier-auto">Fully Automated</div>
+      </div>
+      <div class="hitl-tier">
+        <div class="tier-num">2</div>
+        <div class="tier-badge">ANALYSE</div>
+        <p>Recommendation generation — AI surfaces intelligence, quantifies opportunity and drafts recommended actions</p>
+        <div class="tier-auto">AI-Driven</div>
+      </div>
+      <div class="hitl-tier">
+        <div class="tier-num">3</div>
+        <div class="tier-badge">APPROVE</div>
+        <p>Pricing teams review recommendations — human judgement applied before any action is approved</p>
+        <div class="tier-auto">Human Required</div>
+      </div>
+      <div class="hitl-tier">
+        <div class="tier-num">4</div>
+        <div class="tier-badge">EXECUTE</div>
+        <p>Approved actions implemented through existing system integrations — governed, auditable execution</p>
+        <div class="tier-auto">Governed</div>
+      </div>
+      <div class="hitl-tier">
+        <div class="tier-num">5</div>
+        <div class="tier-badge">LEARN</div>
+        <p>Outcomes measured and fed back into models — continuous improvement of recommendation quality</p>
+        <div class="tier-auto">Closed-Loop</div>
+      </div>
+    </div>
+    <div class="hitl-principle">The platform <span>recommends</span>. People <span>decide</span>. Systems <span>execute</span>. Always.
+    </div>
+  </div>
+
+  <div class="footer-bar"></div>
+  <div class="slide-num">11 / 16</div>
+</div>
+
+<!-- ══ SLIDE 12 ══════════════════════════════════════════════ -->
+<div class="slide s12">
+  <div class="left-stripe"></div>
+  <div class="page-header">
+    <div>
+      <div class="eyebrow">Risk &amp; Compliance</div>
+      <h2>Governance &amp; Risk Framework</h2>
+      <div class="rule"></div>
+    </div>
+  </div>
+
+  <div class="body">
+    <div class="gov-card">
+      <div class="gc-icon">🏛️</div>
+      <h4>FCA Alignment</h4>
+      <p>Supports Consumer Duty and governed decision-making requirements. Recommendations traceable to business rationale.</p>
+    </div>
+    <div class="gov-card">
+      <div class="gc-icon">🔍</div>
+      <h4>Auditability</h4>
+      <p>Full lineage of all recommendations maintained. Every decision point captured with timestamp, actor and rationale.</p>
+    </div>
+    <div class="gov-card">
+      <div class="gc-icon">💡</div>
+      <h4>Explainability</h4>
+      <p>Transparent rationale for every recommendation. Pricing teams can interrogate AI outputs before approval.</p>
+    </div>
+    <div class="gov-card">
+      <div class="gc-icon">🔒</div>
+      <h4>Data Protection</h4>
+      <p>PII protection enforced throughout. Access controls and data minimisation aligned to GDPR obligations.</p>
+    </div>
+    <div class="gov-card">
+      <div class="gc-icon">⚙️</div>
+      <h4>Model Governance</h4>
+      <p>Continuous evaluation and performance monitoring of AI models. Drift detection and retraining protocols in place.</p>
+    </div>
+    <div class="gov-card">
+      <div class="gc-icon">🛡️</div>
+      <h4>Operational Resilience</h4>
+      <p>Fallback mechanisms and recovery procedures defined. Platform degradation does not disrupt core pricing operations.</p>
+    </div>
+  </div>
+
+  <div class="footer-bar"></div>
+  <div class="slide-num">12 / 16</div>
+</div>
+
+<!-- ══ SLIDE 13 ══════════════════════════════════════════════ -->
+<div class="slide s13">
+  <div class="left-stripe"></div>
+  <div class="page-header">
+    <div>
+      <div class="eyebrow">Performance Management</div>
+      <h2>KPI &amp; Measurement Framework</h2>
+      <div class="rule"></div>
+    </div>
+  </div>
+
+  <div class="body">
+    <div class="kpi-col">
+      <div class="kpi-col-header">Commercial</div>
+      <div class="kpi-item">PCW ranking position</div>
+      <div class="kpi-item">Quote conversion rate</div>
+      <div class="kpi-item">New business growth</div>
+      <div class="kpi-item">Revenue per quote</div>
+    </div>
+    <div class="kpi-col">
+      <div class="kpi-col-header">Operational</div>
+      <div class="kpi-item">Monitoring effort (FTE hours)</div>
+      <div class="kpi-item">Time to insight</div>
+      <div class="kpi-item">Time to decision</div>
+      <div class="kpi-item">Recommendation latency</div>
+    </div>
+    <div class="kpi-col">
+      <div class="kpi-col-header">Strategic</div>
+      <div class="kpi-item">Market responsiveness index</div>
+      <div class="kpi-item">Competitor coverage breadth</div>
+      <div class="kpi-item">Recommendation adoption rate</div>
+      <div class="kpi-item">Platform reuse score</div>
+    </div>
+    <div class="kpi-col">
+      <div class="kpi-col-header">Risk &amp; Control</div>
+      <div class="kpi-item">Audit compliance rate</div>
+      <div class="kpi-item">Control effectiveness</div>
+      <div class="kpi-item">Model performance (accuracy)</div>
+      <div class="kpi-item">Governance approval rate</div>
+    </div>
+  </div>
+
+  <div class="footer-bar"></div>
+  <div class="slide-num">13 / 16</div>
+</div>
+
+<!-- ══ SLIDE 14 ══════════════════════════════════════════════ -->
+<div class="slide s14">
+  <div class="left-stripe"></div>
+  <div class="page-header">
+    <div>
+      <div class="eyebrow">Phased Delivery</div>
+      <h2>12-Month Delivery Roadmap</h2>
+      <div class="rule"></div>
+    </div>
+  </div>
+
+  <div class="body">
+    <div class="roadmap-timeline">
+      <div class="wave-card">
+        <div class="wave-header">
+          <div class="wh-wave">Wave 1</div>
+          <div class="wh-title">Market Visibility</div>
+          <div class="wh-months">Months 1 – 3</div>
+        </div>
+        <div class="wave-items">
+          <div class="wave-item">PCW ranking data capture</div>
+          <div class="wave-item">Competitor baseline monitoring</div>
+          <div class="wave-item">Executive dashboards</div>
+          <div class="wave-item">Data quality validation</div>
+        </div>
+      </div>
+      <div class="wave-card">
+        <div class="wave-header">
+          <div class="wh-wave">Wave 2</div>
+          <div class="wh-title">Intelligence</div>
+          <div class="wh-months">Months 4 – 6</div>
+        </div>
+        <div class="wave-items">
+          <div class="wave-item">Analysis agents deployed</div>
+          <div class="wave-item">Trend detection active</div>
+          <div class="wave-item">Opportunity identification</div>
+          <div class="wave-item">Competitor profiling</div>
+        </div>
+      </div>
+      <div class="wave-card">
+        <div class="wave-header">
+          <div class="wh-wave">Wave 3</div>
+          <div class="wh-title">Decision Support</div>
+          <div class="wh-months">Months 7 – 9</div>
+        </div>
+        <div class="wave-items">
+          <div class="wave-item">Recommendation engine live</div>
+          <div class="wave-item">Pega governance integration</div>
+          <div class="wave-item">Approval workflow active</div>
+          <div class="wave-item">AGGS / Duck Creek integration</div>
+        </div>
+      </div>
+      <div class="wave-card">
+        <div class="wave-header">
+          <div class="wh-wave">Wave 4</div>
+          <div class="wh-title">Optimisation</div>
+          <div class="wh-months">Months 10 – 12</div>
+        </div>
+        <div class="wave-items">
+          <div class="wave-item">Simulation capability active</div>
+          <div class="wave-item">Closed-loop learning</div>
+          <div class="wave-item">Continuous optimisation</div>
+          <div class="wave-item">Full PCW channel coverage</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-bar"></div>
+  <div class="slide-num">14 / 16</div>
+</div>
+
+<!-- ══ SLIDE 15 ══════════════════════════════════════════════ -->
+<div class="slide s15">
+  <div class="left-stripe"></div>
+  <div class="page-header">
+    <div>
+      <div class="eyebrow">Business Case</div>
+      <h2>Business Value Summary</h2>
+      <div class="rule"></div>
+    </div>
+  </div>
+
+  <div class="body">
+    <div class="bv-card">
+      <div class="bv-icon">⚡</div>
+      <h3>Faster Market Response</h3>
+      <p>Reduce time from competitor movement to business action from days or weeks to hours. Continuous sensing eliminates monitoring blindspots and manual lag across all active PCW channels.</p>
+    </div>
+    <div class="bv-card">
+      <div class="bv-icon">📈</div>
+      <h3>Better Commercial Outcomes</h3>
+      <p>Improve PCW ranking visibility and pricing competitiveness. Evidence-based recommendations enable more targeted, effective interventions with measurable conversion and revenue impact.</p>
+    </div>
+    <div class="bv-card">
+      <div class="bv-icon">🔧</div>
+      <h3>Operational Efficiency</h3>
+      <p>Significantly reduce manual monitoring and analysis effort. Free pricing and proposition teams to focus on judgement-intensive decisions rather than data collection and synthesis.</p>
+    </div>
+    <div class="bv-card">
+      <div class="bv-icon">🏗️</div>
+      <h3>Reusable Strategic Capability</h3>
+      <p>Establish a Competitive Intelligence platform with architecture extensible across broader General Insurance use cases — not a one-off solution but a durable, scalable strategic asset.</p>
+    </div>
+  </div>
+
+  <div class="footer-bar"></div>
+  <div class="slide-num">15 / 16</div>
+</div>
+
+<!-- ══ SLIDE 16 ══════════════════════════════════════════════ -->
+<div class="slide s16">
+  <div class="cover-top-bar"></div>
+
+  <div class="body">
+    <div class="rec-label">Recommendation &amp; Decision Required</div>
+
+    <div class="rec-box">
+      <p>Proceed with a focused MVP targeting a <strong>single PCW channel</strong> and a limited set of pricing and proposition use cases — validating the core capability before scaling to full channel coverage.</p>
+    </div>
+
+    <h3>Immediate Next Steps</h3>
+
+    <div class="next-steps">
+      <div class="ns-item">
+        <div class="ns-num">1</div>
+        <p>Confirm business sponsorship and executive ownership</p>
+      </div>
+      <div class="ns-item">
+        <div class="ns-num">2</div>
+        <p>Validate commercial value drivers and target KPIs</p>
+      </div>
+      <div class="ns-item">
+        <div class="ns-num">3</div>
+        <p>Define MVP scope and success criteria</p>
+      </div>
+      <div class="ns-item">
+        <div class="ns-num">4</div>
+        <p>Build and validate pilot platform (Wave 1)</p>
+      </div>
+      <div class="ns-item">
+        <div class="ns-num">5</div>
+        <p>Measure outcomes against baseline KPIs</p>
+      </div>
+      <div class="ns-item">
+        <div class="ns-num">6</div>
+        <p>Scale across all PCW channels — Waves 2–4</p>
+      </div>
+    </div>
+
+    <div class="closing-msg">
+      "Transforming competitor monitoring into continuous competitive intelligence and optimisation."
+    </div>
+  </div>
+
+  <div class="watermark">LBG</div>
+  <div class="slide-num">16 / 16</div>
+</div>
+
+</body>
+</html>
